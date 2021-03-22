@@ -39,49 +39,50 @@ while capture.isOpened():
     if not wasReadSuccessful:
         continue
 
-    # -------------- Zosia
-
-    clone = image.copy()
-
-    def draw(event, x, y, flags, parameters):
-        global points, drawing
-
-        if event == cv2.EVENT_LBUTTONDOWN:
-            points = [(x, y)]
-            drawing = True
-        elif event == cv2.EVENT_LBUTTONUP:
-            points.append((x, y))
-            drawing = False
-
-            cv2.rectangle(clone, points[0], points[1], (0, 0, 255), 2)
-            cv2.imshow("image", clone)
-
-
-    cv2.setMouseCallback('main_window', draw)
-
-    # Nie reaguje na przyciski do konca
-    if cv2.waitKey(1) & 0xFF == ord('y') or cv2.waitKey(1) & 0xFF == ord('n'):
-        cv2.destroyWindow('image')
-
-    # -------------- Zosia
+    # # -------------- Zosia
+    #
+    # clone = image.copy()
+    #
+    # def draw(event, x, y, flags, parameters):
+    #     global points, drawing
+    #
+    #     if event == cv2.EVENT_LBUTTONDOWN:
+    #         points = [(x, y)]
+    #         drawing = True
+    #     elif event == cv2.EVENT_LBUTTONUP:
+    #         points.append((x, y))
+    #         drawing = False
+    #
+    #         cv2.rectangle(clone, points[0], points[1], (0, 0, 255), 2)
+    #         cv2.imshow("image", clone)
+    #
+    #
+    # cv2.setMouseCallback('main_window', draw)
+    #
+    # # Nie reaguje na przyciski do konca
+    # if cv2.waitKey(1) & 0xFF == ord('y') or cv2.waitKey(1) & 0xFF == ord('n'):
+    #     cv2.destroyWindow('image')
+    #
+    # # -------------- Zosia
 
     grayscaleImage = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    reducedNoiseGrayscaleImage = cv2.GaussianBlur(grayscaleImage, (21, 21), 0)
+    grayscaleImage_2 = cv2.cvtColor(grayscaleImage,cv2.COLOR_GRAY2BGR)
+    reducedNoiseGrayscaleImage = cv2.GaussianBlur(grayscaleImage_2, (21, 21), 0)
     foregroundMask = backgroundSubtractor.apply(reducedNoiseGrayscaleImage)
+    foregroundMask_2 = cv2.cvtColor(foregroundMask,cv2.COLOR_GRAY2BGR)
     foregroundMaskWithDetectionSpace = cv2.bitwise_and(foregroundMask, foregroundMask, mask=mask)
+    foregroundMaskWithDetectionSpace_2 = cv2.cvtColor(foregroundMaskWithDetectionSpace,cv2.COLOR_GRAY2BGR)
     contours, hierarchy = cv2.findContours(foregroundMaskWithDetectionSpace, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
-    im_list = [grayscaleImage, reducedNoiseGrayscaleImage, foregroundMask]
-    width = int(image.shape[1]*0.333)
-    height = int(im_list[0].shape[0] * width / im_list[0].shape[1])
-    im_list_resize = [cv2.resize(im, (width, height), interpolation=cv2.INTER_CUBIC) for im in im_list]
-    debug_window = cv2.vconcat(im_list_resize)
+    images = [grayscaleImage_2, reducedNoiseGrayscaleImage, foregroundMask_2, foregroundMaskWithDetectionSpace_2]
+    height = int(image.shape[0] * 0.25)
+    width = int(images[0].shape[1] * height / images[0].shape[0])
+    imagesResized = [cv2.resize(im, (width,height), interpolation=cv2.INTER_CUBIC) for im in images]
+    debugWindow = cv2.vconcat(imagesResized)
 
-    #image = cv2.resize(image, (3*width, 3*height),interpolation=cv2.INTER_CUBIC)
-
-    #nie zgadzaja sie wymiary
-    # print(debug_window.shape)
-    # print(image.shape)
+    mainHeight = len(images)*height
+    mainWidth = int(mainHeight/image.shape[0] * image.shape[1])
+    image = cv2.resize(image, (mainWidth, mainHeight),interpolation=cv2.INTER_CUBIC)
 
     for contour in contours:
         if cv2.contourArea(contour) < minArea:
@@ -89,15 +90,10 @@ while capture.isOpened():
         (x, y, w, h) = cv2.boundingRect(contour)
         cv2.rectangle(image, (x, y), (x + w, y + h), (255, 0, 0))
 
-    cv2.imshow("main_window", image)
-    cv2.imshow("debug", debug_window)
-    cv2.moveWindow("debug", 2* image.shape[0], 50) # na razie tak bo mam problem zeby to polaczyc w jedno okienko
+    final = cv2.hconcat([debugWindow, image])
 
-    for contour in contours:
-        if cv2.contourArea(contour) < minArea:
-            continue
-        (x, y, w, h) = cv2.boundingRect(contour)
-        cv2.rectangle(image, (x, y), (x + w, y + h), (255, 0, 0))
+    cv2.imshow("main_window", final)
+    #cv2.imshow("debug",debug_window)
 
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
