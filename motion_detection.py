@@ -74,6 +74,12 @@ while capture.isOpened():
     foregroundMaskWithDetectionSpace_2 = cv2.cvtColor(foregroundMaskWithDetectionSpace,cv2.COLOR_GRAY2BGR)
     contours, hierarchy = cv2.findContours(foregroundMaskWithDetectionSpace, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
+    for contour in contours:
+        if cv2.contourArea(contour) < minArea:
+            continue
+        (x, y, w, h) = cv2.boundingRect(contour)
+        cv2.rectangle(image, (x, y), (x + w, y + h), (255, 0, 0))
+
     images = [grayscaleImage_2, reducedNoiseGrayscaleImage, foregroundMask_2, foregroundMaskWithDetectionSpace_2]
     height = int(image.shape[0] * 0.25)
     width = int(images[0].shape[1] * height / images[0].shape[0])
@@ -83,12 +89,6 @@ while capture.isOpened():
     mainHeight = len(images)*height
     mainWidth = int(mainHeight/image.shape[0] * image.shape[1])
     image = cv2.resize(image, (mainWidth, mainHeight),interpolation=cv2.INTER_CUBIC)
-
-    for contour in contours:
-        if cv2.contourArea(contour) < minArea:
-            continue
-        (x, y, w, h) = cv2.boundingRect(contour)
-        cv2.rectangle(image, (x, y), (x + w, y + h), (255, 0, 0))
 
     final = cv2.hconcat([debugWindow, image])
 
