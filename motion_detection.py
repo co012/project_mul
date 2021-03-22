@@ -31,10 +31,39 @@ wasReadSuccessful, image = capture.read()
 backgroundSubtractor = cv2.bgsegm.createBackgroundSubtractorGSOC()
 mask = make_mask(image, (0, 0), image.shape[:2])
 
+points = []
+drawing = False
+
 while capture.isOpened():
     wasReadSuccessful, image = capture.read()
     if not wasReadSuccessful:
         continue
+
+    # -------------- Zosia
+
+    clone = image.copy()
+
+    def draw(event, x, y, flags, parameters):
+        global points, drawing
+
+        if event == cv2.EVENT_LBUTTONDOWN:
+            points = [(x, y)]
+            drawing = True
+        elif event == cv2.EVENT_LBUTTONUP:
+            points.append((x, y))
+            drawing = False
+
+            cv2.rectangle(clone, points[0], points[1], (0, 0, 255), 2)
+            cv2.imshow("image", clone)
+
+
+    cv2.setMouseCallback('main_window', draw)
+
+    # Nie reaguje na przyciski do konca
+    if cv2.waitKey(1) & 0xFF == ord('y') or cv2.waitKey(1) & 0xFF == ord('n'):
+        cv2.destroyWindow('image')
+
+    # -------------- Zosia
 
     grayscaleImage = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     reducedNoiseGrayscaleImage = cv2.GaussianBlur(grayscaleImage, (21, 21), 0)
