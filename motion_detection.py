@@ -70,8 +70,6 @@ while capture.isOpened():
         (x, y, w, h) = cv2.boundingRect(contour)
         cv2.rectangle(image, (x, y), (x + w, y + h), (255, 0, 0))
 
-    cv2.imshow("hfdshufsd", grayscaleImage)
-    # cv2.imshow("main_window", image)
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
 
