@@ -30,6 +30,18 @@ while capture.isOpened():
     foregroundMask = backgroundSubtractor.apply(reducedNoiseGrayscaleImage)
     contours, hierarchy = cv2.findContours(foregroundMask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
+    im_list = [grayscaleImage, reducedNoiseGrayscaleImage, foregroundMask]
+    width = int(image.shape[1]*0.333)
+    height = int(im_list[0].shape[0] * width / im_list[0].shape[1])
+    im_list_resize = [cv2.resize(im, (width, height), interpolation=cv2.INTER_CUBIC) for im in im_list]
+    debug_window = cv2.vconcat(im_list_resize)
+
+    #image = cv2.resize(image, (3*width, 3*height),interpolation=cv2.INTER_CUBIC)
+
+    #nie zgadzaja sie wymiary
+    # print(debug_window.shape)
+    # print(image.shape)
+
     for contour in contours:
         if cv2.contourArea(contour) < minArea:
             continue
@@ -37,6 +49,17 @@ while capture.isOpened():
         cv2.rectangle(image, (x, y), (x + w, y + h), (255, 0, 0))
 
     cv2.imshow("main_window", image)
+    cv2.imshow("debug", debug_window)
+    cv2.moveWindow("debug", 2* image.shape[0], 50) # na razie tak bo mam problem zeby to polaczyc w jedno okienko
+
+    for contour in contours:
+        if cv2.contourArea(contour) < minArea:
+            continue
+        (x, y, w, h) = cv2.boundingRect(contour)
+        cv2.rectangle(image, (x, y), (x + w, y + h), (255, 0, 0))
+
+    cv2.imshow("hfdshufsd", grayscaleImage)
+    # cv2.imshow("main_window", image)
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
 
