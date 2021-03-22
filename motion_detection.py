@@ -3,6 +3,7 @@ import argparse
 import numpy as np
 
 AGH_CAM = "http://live.uci.agh.edu.pl/video/stream1.cgi?start=1543408695"
+SOME_VIDEO = "https://static.vecteezy.com/system/resources/previews/001/806/954/mp4/two-square-rotation-white-rectangle-animation-free-video.mp4"
 DEFAULT_MIN_AREA = 200  # area of smallest possible contour
 
 
@@ -29,7 +30,7 @@ cv2.namedWindow("main_window")
 capture = cv2.VideoCapture(videoSource)
 wasReadSuccessful, image = capture.read()
 backgroundSubtractor = cv2.bgsegm.createBackgroundSubtractorGSOC()
-mask = make_mask(image, (0, 0), image.shape[:2])
+mask = make_mask(image, (0, 0), (image.shape[1], image.shape[0]))
 
 points = []
 drawing = False
@@ -37,33 +38,29 @@ drawing = False
 while capture.isOpened():
     wasReadSuccessful, image = capture.read()
     if not wasReadSuccessful:
-        continue
+        break
 
-    # # -------------- Zosia
-    #
-    # clone = image.copy()
-    #
-    # def draw(event, x, y, flags, parameters):
-    #     global points, drawing
-    #
-    #     if event == cv2.EVENT_LBUTTONDOWN:
-    #         points = [(x, y)]
-    #         drawing = True
-    #     elif event == cv2.EVENT_LBUTTONUP:
-    #         points.append((x, y))
-    #         drawing = False
-    #
-    #         cv2.rectangle(clone, points[0], points[1], (0, 0, 255), 2)
-    #         cv2.imshow("image", clone)
-    #
-    #
-    # cv2.setMouseCallback('main_window', draw)
-    #
-    # # Nie reaguje na przyciski do konca
-    # if cv2.waitKey(1) & 0xFF == ord('y') or cv2.waitKey(1) & 0xFF == ord('n'):
-    #     cv2.destroyWindow('image')
-    #
-    # # -------------- Zosia
+    # -------------- Zosia
+
+    def draw(event, x, y, flags, parameters):
+        global points, drawing, mask
+
+        if event == cv2.EVENT_LBUTTONDOWN:
+            points = [(x, y)]
+            drawing = True
+        elif event == cv2.EVENT_LBUTTONUP:
+            points.append((x, y))
+            drawing = False
+            mask = make_mask(mask, *points)
+
+
+    cv2.setMouseCallback('main_window', draw)
+
+    # Nie reaguje na przyciski do konca
+    if cv2.waitKey(1) & 0xFF == ord('y') or cv2.waitKey(1) & 0xFF == ord('n'):
+        cv2.destroyWindow('image')
+
+    # -------------- Zosia
 
     grayscaleImage = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     grayscaleImage_2 = cv2.cvtColor(grayscaleImage,cv2.COLOR_GRAY2BGR)
@@ -93,6 +90,7 @@ while capture.isOpened():
     final = cv2.hconcat([debugWindow, image])
 
     cv2.imshow("main_window", final)
+    cv2.imshow("mask", mask)
     #cv2.imshow("debug",debug_window)
 
     if cv2.waitKey(1) & 0xFF == ord('q'):
