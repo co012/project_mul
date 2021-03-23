@@ -28,7 +28,7 @@ def main():
               [sg.Text("Link to a video :")],
               [sg.Input()],
               [sg.Button('Ok'),
-              sg.Button ('AGH')],
+              sg.Button('AGH')],
               [sg.Button('Show', size=(10, 1), font='Helvetica 14'),
                sg.Button('Exit', size=(10, 1), font='Helvetica 14'), ]]
 
@@ -48,7 +48,8 @@ def main():
         event, values = window.read()
         if event == 'Exit' or event == sg.WIN_CLOSED:
             return
-    if event=='AGH':
+
+    if event == 'AGH':
         videoSource = AGH_CAM
     else:
         videoSource = values[0]
@@ -62,84 +63,85 @@ def main():
     print("mode = ", mode)
 
     capture = cv2.VideoCapture(videoSource)
-    recording = False
+    displaying = False
 
-    while event != 'Show':
+    while event != 'Exit' and event != sg.WIN_CLOSED:
         event, values = window.read(timeout=20)
         if event == 'Exit' or event == sg.WIN_CLOSED:
             return
 
         elif event == 'Show':
-            recording = True
+            displaying = True
 
-    if recording:
-        cv2.namedWindow("main_window")
-        capture = cv2.VideoCapture(videoSource)
-        wasReadSuccessful, image = capture.read()
-        backgroundSubtractor = cv2.bgsegm.createBackgroundSubtractorGSOC()
-        mask = make_mask(image, (0, 0), (image.shape[1], image.shape[0]))
+        if displaying:
 
-        points = []
-        drawing = False
-        hasRectangle = False
-
-        while capture.isOpened():
+            capture = cv2.VideoCapture(videoSource)
             wasReadSuccessful, image = capture.read()
-            if not wasReadSuccessful:
-                break
+            backgroundSubtractor = cv2.bgsegm.createBackgroundSubtractorGSOC()
+            mask = make_mask(image, (0, 0), (image.shape[1], image.shape[0]))
 
-            def draw(event, x, y, flags, parameters):
-                global points, drawing, mask, hasRectangle
+            points = []
+            drawing = False
+            hasRectangle = False
 
-                if event == cv2.EVENT_LBUTTONDOWN:
-                    points = [(x, y)]
-                    drawing = True
-                elif event == cv2.EVENT_LBUTTONUP:
-                    points.append((x, y))
-                    drawing = False
-                    mask = make_mask(mask, *points)
-                    hasRectangle = True
+            while capture.isOpened():
+                wasReadSuccessful, image = capture.read()
+                if not wasReadSuccessful:
+                    break
 
-            cv2.setMouseCallback('main_window', draw)
+                def draw(event, x, y, flags, parameters):
+                    global points, drawing, mask, hasRectangle
 
-            grayscaleImage = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-            reducedNoiseGrayscaleImage = cv2.GaussianBlur(grayscaleImage, (21, 21), 0)
-            foregroundMask = backgroundSubtractor.apply(reducedNoiseGrayscaleImage)
-            foregroundMaskWithDetectionSpace = cv2.bitwise_and(foregroundMask, foregroundMask, mask=mask)
-            contours, hierarchy = cv2.findContours(foregroundMaskWithDetectionSpace, cv2.RETR_EXTERNAL,
-                                                   cv2.CHAIN_APPROX_SIMPLE)
+                    if event == cv2.EVENT_LBUTTONDOWN:
+                        points = [(x, y)]
+                        drawing = True
+                    elif event == cv2.EVENT_LBUTTONUP:
+                        points.append((x, y))
+                        drawing = False
+                        mask = make_mask(mask, *points)
+                        hasRectangle = True
 
-            for contour in contours:
-                if cv2.contourArea(contour) < minArea:
-                    continue
-                (x, y, w, h) = cv2.boundingRect(contour)
-                cv2.rectangle(image, (x, y), (x + w, y + h), (255, 0, 0))
+                cv2.setMouseCallback('main_window', draw)
 
-            images = [grayscaleImage, reducedNoiseGrayscaleImage, foregroundMask, foregroundMaskWithDetectionSpace]
-            height = int(image.shape[0] * 0.25)
-            width = int(images[0].shape[1] * height / images[0].shape[0])
-            imagesResized = [cv2.resize(im, (width, height), interpolation=cv2.INTER_CUBIC) for im in images]
-            debugWindow = cv2.vconcat(imagesResized)
+                grayscaleImage = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+                reducedNoiseGrayscaleImage = cv2.GaussianBlur(grayscaleImage, (21, 21), 0)
+                foregroundMask = backgroundSubtractor.apply(reducedNoiseGrayscaleImage)
+                foregroundMaskWithDetectionSpace = cv2.bitwise_and(foregroundMask, foregroundMask, mask=mask)
+                contours, hierarchy = cv2.findContours(foregroundMaskWithDetectionSpace, cv2.RETR_EXTERNAL,
+                                                       cv2.CHAIN_APPROX_SIMPLE)
 
-            if hasRectangle:
-                cv2.rectangle(image, points[0], points[1], (0, 0, 255), 2)
-            cv2.imshow("main_window", image)
+                for contour in contours:
+                    if cv2.contourArea(contour) < minArea:
+                        continue
+                    (x, y, w, h) = cv2.boundingRect(contour)
+                    cv2.rectangle(image, (x, y), (x + w, y + h), (255, 0, 0))
 
-            if mode=="mode":
-                cv2.imshow("debug", debugWindow)
-                cv2.moveWindow("debug", int(2.1 * image.shape[0]), 110)
+                images = [grayscaleImage, reducedNoiseGrayscaleImage, foregroundMask, foregroundMaskWithDetectionSpace]
+                height = int(image.shape[0] * 0.25)
+                width = int(images[0].shape[1] * height / images[0].shape[0])
+                imagesResized = [cv2.resize(im, (width, height), interpolation=cv2.INTER_CUBIC) for im in images]
+                debugWindow = cv2.vconcat(imagesResized)
 
-            cv2.imshow("main_window", image)
+                if hasRectangle:
+                    cv2.rectangle(image, points[0], points[1], (0, 0, 255), 2)
+                cv2.imshow("main_window", image)
 
-            k = cv2.waitKey(1)
+                if mode=="mode":
+                    cv2.imshow("debug", debugWindow)
+                    cv2.moveWindow("debug", int(2.1 * image.shape[0]), 110)
 
-            if k == ord('d'):
-                mode = "mode"
-            if k == ord('q'):
-                break
+                cv2.startWindowThread()
+                cv2.namedWindow("main_window")
+                cv2.imshow("main_window", image)
 
-            # if cv2.waitKey(1) & 0xFF == ord('q'):
-            #     break
+                k = cv2.waitKey(1)
+
+                if k == ord('d'):
+                    mode = "mode"
+                if k == ord('q'):
+                    cv2.destroyWindow('main_window')
+                    displaying = False
+                    break
 
     capture.release()
     cv2.destroyAllWindows()
