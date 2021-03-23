@@ -26,6 +26,9 @@ print("source = ", videoSource)
 minArea = args.get("min_area", DEFAULT_MIN_AREA)
 print("area of smallest contour = ", minArea)
 
+mode = args.get("mode", "normal")
+print("mode = ", mode)
+
 cv2.namedWindow("main_window")
 capture = cv2.VideoCapture(videoSource)
 wasReadSuccessful, image = capture.read()
@@ -87,9 +90,8 @@ while capture.isOpened():
     mainWidth = int(mainHeight/image.shape[0] * image.shape[1])
     image = cv2.resize(image, (mainWidth, mainHeight),interpolation=cv2.INTER_CUBIC)
 
-    final = cv2.hconcat([debugWindow, image])
 
-    cv2.imshow("main_window", final)
+    cv2.imshow("main_window", image)
     cv2.imshow("mask", mask)
     #cv2.imshow("debug",debug_window)
 
