@@ -37,6 +37,7 @@ mask = make_mask(image, (0, 0), (image.shape[1], image.shape[0]))
 
 points = []
 drawing = False
+hasRectangle = False
 
 while capture.isOpened():
     wasReadSuccessful, image = capture.read()
@@ -46,7 +47,7 @@ while capture.isOpened():
     # -------------- Zosia
 
     def draw(event, x, y, flags, parameters):
-        global points, drawing, mask
+        global points, drawing, mask, hasRectangle
 
         if event == cv2.EVENT_LBUTTONDOWN:
             points = [(x, y)]
@@ -55,6 +56,7 @@ while capture.isOpened():
             points.append((x, y))
             drawing = False
             mask = make_mask(mask, *points)
+            hasRectangle = True
 
 
     cv2.setMouseCallback('main_window', draw)
@@ -83,6 +85,8 @@ while capture.isOpened():
     imagesResized = [cv2.resize(im, (width,height), interpolation=cv2.INTER_CUBIC) for im in images]
     debugWindow = cv2.vconcat(imagesResized)
 
+    if hasRectangle:
+        cv2.rectangle(image, points[0], points[1], (0, 0, 255), 2)
     cv2.imshow("main_window", image)
     #cv2.imshow("mask", mask)
     cv2.imshow("debug",debugWindow)
