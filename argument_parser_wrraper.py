@@ -6,7 +6,6 @@ SOME_VIDEO = "https://static.vecteezy.com/system/resources/" \
 DEFAULT_MIN_AREA = 200  # area of smallest possible contour
 
 
-
 class ArgumentsClump:
 
     def __init__(self):
