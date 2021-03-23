@@ -24,6 +24,9 @@ class DebugController:
             self.active_debug_mode(img)
 
     def show_debug_window(self, images):
+        if cv2.getWindowProperty(self.debugWindowName, cv2.WND_PROP_VISIBLE) == 0:
+            self.deactivate_debug_mode()
+            return
         image = images[0]
         height = int(image.shape[0] * 0.25)
         width = int(images[0].shape[1] * height / images[0].shape[0])

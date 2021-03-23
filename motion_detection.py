@@ -65,7 +65,7 @@ while capture.isOpened():
     key = cv2.waitKey(1)
     if key == ord('d'):
         debugController.toggle_debug(image)
-    if key == ord('q'):
+    if key == ord('q') or cv2.getWindowProperty(MAIN_WINDOW_NAME, cv2.WND_PROP_VISIBLE == 0):
         break
 
     # if cv2.waitKey(1) & 0xFF == ord('q'):
