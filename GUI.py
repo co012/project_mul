@@ -27,7 +27,8 @@ def main():
     layout = [[sg.Text('Movement detector', size=(40, 1), justification='center', font='Helvetica 20')],
               [sg.Text("Link to a video :")],
               [sg.Input()],
-              [sg.Button('Ok')],
+              [sg.Button('Ok'),
+              sg.Button ('AGH')],
               [sg.Button('Show', size=(10, 1), font='Helvetica 14'),
                sg.Button('Exit', size=(10, 1), font='Helvetica 14'), ]]
 
@@ -42,12 +43,16 @@ def main():
 
     event = None
     values = []
-    while event != 'Ok':
+
+    while (event != 'Ok' and event!='AGH'):
         event, values = window.read()
         if event == 'Exit' or event == sg.WIN_CLOSED:
             return
+    if event=='AGH':
+        videoSource = AGH_CAM
+    else:
+        videoSource = values[0]
 
-    videoSource = values[0]
     print("source = ", videoSource)
 
     minArea = args.get("min_area", DEFAULT_MIN_AREA)
@@ -55,7 +60,7 @@ def main():
 
     mode = args.get("mode", "normal")
     print("mode = ", mode)
-    
+
     capture = cv2.VideoCapture(videoSource)
     recording = False
 
@@ -119,12 +124,22 @@ def main():
             if hasRectangle:
                 cv2.rectangle(image, points[0], points[1], (0, 0, 255), 2)
             cv2.imshow("main_window", image)
-            # cv2.imshow("mask", mask)
-            cv2.imshow("debug", debugWindow)
-            cv2.moveWindow("debug", int(2.1 * image.shape[0]), 110)
 
-            if cv2.waitKey(1) & 0xFF == ord('q'):
+            if mode=="mode":
+                cv2.imshow("debug", debugWindow)
+                cv2.moveWindow("debug", int(2.1 * image.shape[0]), 110)
+
+            cv2.imshow("main_window", image)
+
+            k = cv2.waitKey(1)
+
+            if k == ord('d'):
+                mode = "mode"
+            if k == ord('q'):
                 break
+
+            # if cv2.waitKey(1) & 0xFF == ord('q'):
+            #     break
 
     capture.release()
     cv2.destroyAllWindows()

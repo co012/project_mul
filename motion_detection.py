@@ -87,13 +87,22 @@ while capture.isOpened():
 
     if hasRectangle:
         cv2.rectangle(image, points[0], points[1], (0, 0, 255), 2)
-    cv2.imshow("main_window", image)
-    #cv2.imshow("mask", mask)
-    cv2.imshow("debug",debugWindow)
-    cv2.moveWindow("debug", int(2.1* image.shape[0]), 110)
 
-    if cv2.waitKey(1) & 0xFF == ord('q'):
-     break
+    if mode=="mode":
+        cv2.imshow("debug", debugWindow)
+        cv2.moveWindow("debug", int(2.1 * image.shape[0]), 110)
+
+    cv2.imshow("main_window", image)
+
+    k = cv2.waitKey(1)
+
+    if k == ord('d'):
+        mode = "mode"
+    if k == ord('q'):
+        break
+
+    # if cv2.waitKey(1) & 0xFF == ord('q'):
+    #  break
 
 capture.release()
 cv2.destroyAllWindows()
