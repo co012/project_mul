@@ -1,43 +1,30 @@
 import cv2
-import argparse
 from detection_mask_controller import DetectionMaskController
 from debug_controller import DebugController
 from input_window import InputWindow
+from argument_parser_wrraper import ArgumentsClump
 
-AGH_CAM = "http://live.uci.agh.edu.pl/video/stream1.cgi"
-SOME_VIDEO = "https://static.vecteezy.com/system/resources/" \
-             "previews/001/806/954/mp4/two-square-rotation-white-rectangle-animation-free-video.mp4"
-DEFAULT_MIN_AREA = 200  # area of smallest possible contour
 MAIN_WINDOW_NAME = "main_window"
 
-argumentParser = argparse.ArgumentParser()
-argumentParser.add_argument("-s", "--source", default=AGH_CAM, help="path to video source")
-argumentParser.add_argument("-m", "--mode", help="run script in debug mode", default="normal")
-argumentParser.add_argument("-a", "--min-area", type=int, default=DEFAULT_MIN_AREA, help="area of smallest contour")
-args = vars(argumentParser.parse_args())
-print(args)
+argumentClump = ArgumentsClump()
+videoSource, minArea, mode = argumentClump.videoSource, argumentClump.minArea, argumentClump.mode
 
-videoSource = args.get("source", AGH_CAM)
-print("source = ", videoSource)
 
-minArea = args.get("min_area", DEFAULT_MIN_AREA)
-print("area of smallest contour = ", minArea)
-
-mode = args.get("mode", "normal")
-print("mode = ", mode)
-
-inputWindow = InputWindow()
+inputWindow = InputWindow(videoSource)
 inputWindow.show()
 if inputWindow.interrupted is True:
     exit(1)
 
+if inputWindow.videoSource is not None:
+    videoSource = videoSource
+
 cv2.namedWindow(MAIN_WINDOW_NAME)
-capture = cv2.VideoCapture(AGH_CAM)
+capture = cv2.VideoCapture(videoSource)
 wasReadSuccessful, referenceImage = capture.read()
 backgroundSubtractor = cv2.bgsegm.createBackgroundSubtractorGSOC()
 detectionMaskController = DetectionMaskController(referenceImage, MAIN_WINDOW_NAME)
 debugController = DebugController()
-if mode == "Debug":
+if mode.upper() == "DEBUG":
     debugController.active_debug_mode(referenceImage)
 
 while capture.isOpened():

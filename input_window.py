@@ -1,16 +1,16 @@
 import PySimpleGUI as sg
-AGH_CAM = "http://live.uci.agh.edu.pl/video/stream1.cgi"
 
 
 class InputWindow:
 
     layout = [[sg.Text('Movement detector', size=(40, 1), justification='center', font='Helvetica 20')],
               [sg.Text("Link to a video :")],
-              [sg.Input(default_text=AGH_CAM)],
+              [None],
               [sg.Button('Show', size=(10, 1), font='Helvetica 14'), sg.Button('Exit', size=(10, 1), font='Helvetica 14') ]]
 
-    def __init__(self):
-        self.videoSource = AGH_CAM
+    def __init__(self, default_src):
+        self.videoSource = default_src
+        self.layout[2][0] = sg.Input(default_text=default_src)
         self.interrupted = False
 
     def show(self):
