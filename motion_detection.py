@@ -1,8 +1,8 @@
 import cv2
 import argparse
-import numpy as np
-import detection_mask_controller as dmc
-import debug_controller as dc
+from detection_mask_controller import DetectionMaskController
+from debug_controller import DebugController
+from input_window import InputWindow
 
 AGH_CAM = "http://live.uci.agh.edu.pl/video/stream1.cgi"
 SOME_VIDEO = "https://static.vecteezy.com/system/resources/" \
@@ -26,12 +26,17 @@ print("area of smallest contour = ", minArea)
 mode = args.get("mode", "normal")
 print("mode = ", mode)
 
+inputWindow = InputWindow()
+inputWindow.show()
+if inputWindow.interrupted is True:
+    exit(1)
+
 cv2.namedWindow(MAIN_WINDOW_NAME)
-capture = cv2.VideoCapture(videoSource)
+capture = cv2.VideoCapture(AGH_CAM)
 wasReadSuccessful, referenceImage = capture.read()
 backgroundSubtractor = cv2.bgsegm.createBackgroundSubtractorGSOC()
-detectionMaskController = dmc.DetectionMaskController(referenceImage, MAIN_WINDOW_NAME)
-debugController = dc.DebugController()
+detectionMaskController = DetectionMaskController(referenceImage, MAIN_WINDOW_NAME)
+debugController = DebugController()
 if mode == "Debug":
     debugController.active_debug_mode(referenceImage)
 
@@ -68,8 +73,6 @@ while capture.isOpened():
     if key == ord('q') or cv2.getWindowProperty(MAIN_WINDOW_NAME, cv2.WND_PROP_VISIBLE == 0):
         break
 
-    # if cv2.waitKey(1) & 0xFF == ord('q'):
-    #  break
 
 capture.release()
 cv2.destroyAllWindows()
