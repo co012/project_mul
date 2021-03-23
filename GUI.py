@@ -22,16 +22,16 @@ mask = None
 
 def main():
     global hasRectangle, drawing, points, mask
-    #sg.theme('LightGrey')
+    # sg.theme('LightGrey')
 
-    layout = [[sg.Text('OpenCV Demo', size=(40, 1), justification='center', font='Helvetica 20')],
+    layout = [[sg.Text('Movement detector', size=(40, 1), justification='center', font='Helvetica 20')],
               [sg.Text("Link to a video :")],
               [sg.Input()],
               [sg.Button('Ok')],
               [sg.Button('Show', size=(10, 1), font='Helvetica 14'),
                sg.Button('Exit', size=(10, 1), font='Helvetica 14'), ]]
 
-    window = sg.Window('Demo Application - OpenCV Integration', layout, location=(800, 400))
+    window = sg.Window('Movement detector', layout, location=(800, 400))
 
     argumentParser = argparse.ArgumentParser()
     argumentParser.add_argument("-s", "--source", default=AGH_CAM, help="path to video source")
