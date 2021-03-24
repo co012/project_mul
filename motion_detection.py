@@ -16,7 +16,7 @@ if inputWindow.interrupted is True:
     exit(1)
 
 if inputWindow.videoSource is not None:
-    videoSource = videoSource
+    videoSource = inputWindow.videoSource
 
 cv2.namedWindow(MAIN_WINDOW_NAME)
 capture = cv2.VideoCapture(videoSource)
