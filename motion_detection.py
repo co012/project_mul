@@ -15,6 +15,7 @@ if inputWindow.interrupted is True:
 
 videoSource = inputWindow.videoSource
 debugMode = inputWindow.debugMode
+minArea = inputWindow.minArea
 
 cv2.namedWindow(MAIN_WINDOW_NAME)
 capture = cv2.VideoCapture(videoSource)
