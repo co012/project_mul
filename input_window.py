@@ -26,6 +26,11 @@ class InputWindow:
                 break
             if event == "Show":
                 self.videoSource = values["-SOURCE-"]
+                try:
+                    self.videoSource = int(self.videoSource)
+                except ValueError:
+                    pass
+
                 self.minArea = int(values["-MIN-AREA-"])
                 self.debugMode = values["-DEBUG-MODE-"]
                 break
