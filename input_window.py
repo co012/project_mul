@@ -11,7 +11,7 @@ class InputWindow:
                        [sg.Checkbox('Debug mode', key="-DEBUG-MODE-")],
                        [sg.Spin([i for i in range(0, 2000, 50)], initial_value=200, key="-MIN-AREA-"),
                         sg.Text('Min area level'),sg.Spin([i for i in range(0, 1000, 1)], initial_value=16, key = "-BACK-SUB-"),
-                         sg.Text('Sensivity')],
+                         sg.Text('Sensitivity')],
                        [sg.Button('Show', size=(10, 1), font='Helvetica 14'), sg.Button('Exit', size=(10, 1), font='Helvetica 14')]]
         self.interrupted = False
         self.debugMode = False
