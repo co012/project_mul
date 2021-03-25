@@ -17,9 +17,12 @@ videoSource = inputWindow.videoSource
 debugMode = inputWindow.debugMode
 minArea = inputWindow.minArea
 
-cv2.namedWindow(MAIN_WINDOW_NAME)
 capture = cv2.VideoCapture(videoSource)
 wasReadSuccessful, referenceImage = capture.read()
+if not wasReadSuccessful:
+    print("Video source can't be read")
+    exit(-2)
+cv2.imshow(MAIN_WINDOW_NAME,referenceImage)
 backgroundSubtractor = cv2.bgsegm.createBackgroundSubtractorGSOC()
 detectionMaskController = DetectionMaskController(referenceImage, MAIN_WINDOW_NAME)
 debugController = DebugController()
@@ -32,9 +35,10 @@ while capture.isOpened():
         break
 
     grayscaleImage = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    reducedNoiseGrayscaleImage = cv2.GaussianBlur(grayscaleImage, (21, 21), 0)
+    reducedNoiseGrayscaleImage = cv2.GaussianBlur(grayscaleImage, (5, 3), 0)
     foregroundMask = backgroundSubtractor.apply(reducedNoiseGrayscaleImage)
-    foregroundMaskWithDetectionSpace = detectionMaskController.apply_mask(foregroundMask)
+    foregroundMaskDilated = cv2.dilate(foregroundMask, None, iterations=2)
+    foregroundMaskWithDetectionSpace = detectionMaskController.apply_mask(foregroundMaskDilated)
     contours, hierarchy = cv2.findContours(foregroundMaskWithDetectionSpace, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
     for contour in contours:
@@ -47,7 +51,7 @@ while capture.isOpened():
         cv2.rectangle(image, *detectionMaskController.points, (0, 0, 255), 2)
 
     cv2.imshow(MAIN_WINDOW_NAME, image)
-    images = [grayscaleImage, reducedNoiseGrayscaleImage, foregroundMask,
+    images = [grayscaleImage, reducedNoiseGrayscaleImage, foregroundMask, foregroundMaskDilated,
               detectionMaskController.mask, foregroundMaskWithDetectionSpace]
 
     if debugController.debugIsActive:
