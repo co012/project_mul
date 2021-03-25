@@ -9,8 +9,6 @@ class InputWindow:
                        [sg.Text("Link to a video :")],
                        [sg.Input(default_text=default_src, key="-SOURCE-"), sg.FileBrowse()],
                        [sg.Checkbox('Debug mode', key="-DEBUG-MODE-")],
-                       # [sg.Text("Min area :")],
-                       # [sg.Input(key="-MIN-AREA-")],
                        [sg.Spin([i for i in range(0, 2000, 50)], initial_value=200, key="-MIN-AREA-"),
                         sg.Text('Min area level')],
                        [sg.Button('Show', size=(10, 1), font='Helvetica 14'), sg.Button('Exit', size=(10, 1), font='Helvetica 14')]]
