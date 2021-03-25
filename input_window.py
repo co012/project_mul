@@ -7,10 +7,10 @@ class InputWindow:
         self.videoSource = default_src
         self.layout = [[sg.Text('Movement detector', size=(40, 1), justification='center', font='Helvetica 20')],
                        [sg.Text("Link to a video :")],
-                       [sg.Input(default_text=default_src), sg.FileBrowse()],
-                       [sg.Checkbox('Debug mode')],
+                       [sg.Input(default_text=default_src, key="-SOURCE-"), sg.FileBrowse()],
+                       [sg.Checkbox('Debug mode', key="-DEBUG-MODE-")],
                        [sg.Text("Min area :")],
-                       [sg.Input()],
+                       [sg.Input(key="-MIN-AREA-")],
                        [sg.Button('Show', size=(10, 1), font='Helvetica 14'), sg.Button('Exit', size=(10, 1), font='Helvetica 14')]]
         self.interrupted = False
         self.debugMode = False
@@ -25,7 +25,9 @@ class InputWindow:
                 self.interrupted = True
                 break
             if event == "Show":
-                self.videoSource = values[0]
+                self.videoSource = values["-SOURCE-"]
+                self.minArea = int(values["-MIN-AREA-"])
+                self.debugMode = values["-DEBUG-MODE-"]
                 break
 
         window.close()
