@@ -16,6 +16,7 @@ if inputWindow.interrupted is True:
 videoSource = inputWindow.videoSource
 debugMode = inputWindow.debugMode
 minArea = inputWindow.minArea
+backSub = inputWindow.backSub
 
 capture = cv2.VideoCapture(videoSource)
 wasReadSuccessful, referenceImage = capture.read()
@@ -23,7 +24,8 @@ if not wasReadSuccessful:
     print("Video source can't be read")
     exit(-2)
 cv2.imshow(MAIN_WINDOW_NAME,referenceImage)
-backgroundSubtractor = cv2.bgsegm.createBackgroundSubtractorGSOC()
+# backgroundSubtractor = cv2.bgsegm.createBackgroundSubtractorGSOC()
+backgroundSubtractor = cv2.createBackgroundSubtractorMOG2(varThreshold = backSub) #dalam inny ten createBack... bo tu moge te zmienne dawac
 detectionMaskController = DetectionMaskController(referenceImage, MAIN_WINDOW_NAME)
 debugController = DebugController()
 if debugMode:
