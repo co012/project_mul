@@ -7,7 +7,7 @@ class InputWindow:
         self.videoSource = default_src
         self.layout = [[sg.Text('Movement detector', size=(40, 1), justification='center', font='Helvetica 20')],
                        [sg.Text("Link to a video :")],
-                       [sg.Input(default_text=default_src)],
+                       [sg.Input(default_text=default_src), sg.FileBrowse()],
                        [sg.Button('Show', size=(10, 1), font='Helvetica 14'), sg.Button('Exit', size=(10, 1), font='Helvetica 14')]]
         self.interrupted = False
 
