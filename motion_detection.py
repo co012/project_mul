@@ -18,14 +18,13 @@ debugMode = inputWindow.debugMode
 minArea = inputWindow.minArea
 backSub = inputWindow.backSub
 
+cv2.namedWindow(MAIN_WINDOW_NAME)
 capture = cv2.VideoCapture(videoSource)
 wasReadSuccessful, referenceImage = capture.read()
 if not wasReadSuccessful:
     print("Video source can't be read")
     exit(-2)
-cv2.imshow(MAIN_WINDOW_NAME,referenceImage)
-# backgroundSubtractor = cv2.bgsegm.createBackgroundSubtractorGSOC()
-backgroundSubtractor = cv2.createBackgroundSubtractorMOG2(varThreshold = backSub) #dalam inny ten createBack... bo tu moge te zmienne dawac
+backgroundSubtractor = cv2.createBackgroundSubtractorMOG2(varThreshold=backSub)
 detectionMaskController = DetectionMaskController(referenceImage, MAIN_WINDOW_NAME)
 debugController = DebugController()
 if debugMode:
@@ -37,7 +36,7 @@ while capture.isOpened():
         break
 
     grayscaleImage = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    reducedNoiseGrayscaleImage = cv2.GaussianBlur(grayscaleImage, (5, 3), 0)
+    reducedNoiseGrayscaleImage = cv2.GaussianBlur(grayscaleImage, (21, 21), 0)
     foregroundMask = backgroundSubtractor.apply(reducedNoiseGrayscaleImage)
     foregroundMaskDilated = cv2.dilate(foregroundMask, None, iterations=2)
     foregroundMaskWithDetectionSpace = detectionMaskController.apply_mask(foregroundMaskDilated)
@@ -59,7 +58,7 @@ while capture.isOpened():
     if debugController.debugIsActive:
         debugController.show_debug_window(images)
 
-    key = cv2.waitKey(1)
+    key = cv2.waitKey(16)
     if key == ord('d'):
         debugController.toggle_debug(image)
     if key == ord('q') or cv2.getWindowProperty(MAIN_WINDOW_NAME, cv2.WND_PROP_VISIBLE) == 0:

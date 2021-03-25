@@ -28,7 +28,7 @@ class DebugController:
             self.deactivate_debug_mode()
             return
         image = images[0]
-        height = int(image.shape[0] * 0.25)
+        height = int(image.shape[0] / len(images))
         width = int(images[0].shape[1] * height / images[0].shape[0])
         images_resized = [cv2.resize(im, (width, height), interpolation=cv2.INTER_CUBIC) for im in images]
         debug_window = cv2.vconcat(images_resized)
