@@ -24,8 +24,7 @@ if not wasReadSuccessful:
     print("Video source can't be read")
     exit(-2)
 cv2.imshow(MAIN_WINDOW_NAME,referenceImage)
-# backgroundSubtractor = cv2.bgsegm.createBackgroundSubtractorGSOC()
-backgroundSubtractor = cv2.createBackgroundSubtractorMOG2(varThreshold = backSub) #dalam inny ten createBack... bo tu moge te zmienne dawac
+backgroundSubtractor = cv2.createBackgroundSubtractorMOG2(varThreshold = backSub)
 detectionMaskController = DetectionMaskController(referenceImage, MAIN_WINDOW_NAME)
 debugController = DebugController()
 if debugMode:
