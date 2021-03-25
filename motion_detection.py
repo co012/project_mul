@@ -5,12 +5,9 @@ from input_window import InputWindow
 from argument_parser_wrraper import ArgumentsClump
 
 MAIN_WINDOW_NAME = "main_window"
+AGH_CAM = "http://live.uci.agh.edu.pl/video/stream1.cgi"
 
-argumentClump = ArgumentsClump()
-videoSource, minArea, mode = argumentClump.videoSource, argumentClump.minArea, argumentClump.mode
-
-
-inputWindow = InputWindow(videoSource)
+inputWindow = InputWindow(AGH_CAM)
 inputWindow.show()
 if inputWindow.interrupted is True:
     exit(1)
