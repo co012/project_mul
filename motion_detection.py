@@ -2,7 +2,7 @@ import cv2
 from detection_mask_controller import DetectionMaskController
 from debug_controller import DebugController
 from input_window import InputWindow
-from argument_parser_wrraper import ArgumentsClump
+
 
 MAIN_WINDOW_NAME = "main_window"
 AGH_CAM = "http://live.uci.agh.edu.pl/video/stream1.cgi"
@@ -12,8 +12,9 @@ inputWindow.show()
 if inputWindow.interrupted is True:
     exit(1)
 
-if inputWindow.videoSource is not None:
-    videoSource = inputWindow.videoSource
+
+videoSource = inputWindow.videoSource
+debugMode = inputWindow.debugMode
 
 cv2.namedWindow(MAIN_WINDOW_NAME)
 capture = cv2.VideoCapture(videoSource)
@@ -21,7 +22,7 @@ wasReadSuccessful, referenceImage = capture.read()
 backgroundSubtractor = cv2.bgsegm.createBackgroundSubtractorGSOC()
 detectionMaskController = DetectionMaskController(referenceImage, MAIN_WINDOW_NAME)
 debugController = DebugController()
-if mode.upper() == "DEBUG":
+if debugMode:
     debugController.active_debug_mode(referenceImage)
 
 while capture.isOpened():

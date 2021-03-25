@@ -10,6 +10,8 @@ class InputWindow:
                        [sg.Input(default_text=default_src), sg.FileBrowse()],
                        [sg.Button('Show', size=(10, 1), font='Helvetica 14'), sg.Button('Exit', size=(10, 1), font='Helvetica 14')]]
         self.interrupted = False
+        self.debugMode = False
+        self.minArea = 200
 
     def show(self):
         window = sg.Window('Movement detector', self.layout, location=(800, 400))
