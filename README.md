@@ -2,6 +2,6 @@
 
 
 
-Joanna Bryk - 3 - opcja 'debug', ustawienie poziomu czulosci
- Kacper - 2 - 'szkielet', podstawowe działanie programu  
- Zosia - 1 - ustalanie i wykrywanie obszarów czułości
+Joanna Bryk - opcja 'debug', ustawienie poziomu czulosci
+Kacper Slusarczyk - 'szkielet' programu, podstawowe działanie programu  
+Zofia Grodecka -  ustalanie i wykrywanie obszarów czułości
