@@ -2,11 +2,6 @@
 
 
 
- Asia - 3 - 'debug', w którym wizualizowane będą poszczególne etapy przetwarzania obrazu  
+Joanna Bryk - 3 - opcja 'debug', ustawienie poziomu czulosci
  Kacper - 2 - 'szkielet', podstawowe działanie programu  
  Zosia - 1 - ustalanie i wykrywanie obszarów czułości
-
-Problem z zamykaniem programu  
-GUI na podanie źrudła  
-Zamykanie krzyżykiem  
-Odczytywanie z kamerki  
