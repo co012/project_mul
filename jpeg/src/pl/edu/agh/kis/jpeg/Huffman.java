@@ -9,12 +9,12 @@ class Huffman {
     private int bufferPutBits, bufferPutBuffer;
     private int[][][] DC_matrix;
     private int[][][] AC_matrix;
-    private final int[] bitsDCluminance = {0x00, 0, 1, 5, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0};
-    private final int[] valDCluminance = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11};
-    private final int[] bitsDCchrominance = {0x01, 0, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0};
-    private final int[] valDCchrominance = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11};
-    private final int[] bitsACluminance = {0x10, 0, 2, 1, 3, 3, 2, 4, 3, 5, 5, 4, 4, 0, 0, 1, 0x7d};
-    private final int[] valACluminance = {0x01, 0x02, 0x03, 0x00, 0x04, 0x11, 0x05, 0x12, 0x21, 0x31, 0x41, 0x06, 0x13, 0x51,
+    private final static int[] BITS_DC_LUMINANCE = {0, 0, 1, 5, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0};
+    private final static int[] VALUES_DC_LUMINANCE = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11};
+    private final static int[] BITS_DC_CHROMINANCE = {1, 0, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0};
+    private final static int[] VALUES_DC_CHROMINANCE = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11};
+    private final static int[] BITS_AC_LUMINANCE = {16, 0, 2, 1, 3, 3, 2, 4, 3, 5, 5, 4, 4, 0, 0, 1, 125};
+    private final static int[] VALUES_AC_LUMINANCE = {0x01, 0x02, 0x03, 0x00, 0x04, 0x11, 0x05, 0x12, 0x21, 0x31, 0x41, 0x06, 0x13, 0x51,
             0x61, 0x07, 0x22, 0x71, 0x14, 0x32, 0x81, 0x91, 0xa1, 0x08, 0x23, 0x42, 0xb1, 0xc1, 0x15, 0x52, 0xd1, 0xf0,
             0x24, 0x33, 0x62, 0x72, 0x82, 0x09, 0x0a, 0x16, 0x17, 0x18, 0x19, 0x1a, 0x25, 0x26, 0x27, 0x28, 0x29, 0x2a,
             0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x3a, 0x43, 0x44, 0x45, 0x46, 0x47, 0x48, 0x49, 0x4a, 0x53, 0x54, 0x55,
@@ -25,9 +25,8 @@ class Huffman {
             0xd9, 0xda, 0xe1, 0xe2, 0xe3, 0xe4, 0xe5, 0xe6, 0xe7, 0xe8, 0xe9, 0xea, 0xf1, 0xf2, 0xf3, 0xf4, 0xf5, 0xf6,
             0xf7, 0xf8, 0xf9, 0xfa
     };
-    private final int[] bitsACchrominance = {0x11, 0, 2, 1, 2, 4, 4, 3, 4, 7, 5, 4, 4, 0, 1, 2, 0x77};
-
-    private final int[] valACchrominance = {0x00, 0x01, 0x02, 0x03, 0x11, 0x04, 0x05, 0x21, 0x31, 0x06, 0x12, 0x41, 0x51,
+    private final static int[] BITS_AC_CHROMINANCE = {17, 0, 2, 1, 2, 4, 4, 3, 4, 7, 5, 4, 4, 0, 1, 2, 119};
+    private final static int[] VALUES_AC_CHROMINANCE = {0x00, 0x01, 0x02, 0x03, 0x11, 0x04, 0x05, 0x21, 0x31, 0x06, 0x12, 0x41, 0x51,
             0x07, 0x61, 0x71, 0x13, 0x22, 0x32, 0x81, 0x08, 0x14, 0x42, 0x91, 0xa1, 0xb1, 0xc1, 0x09, 0x23, 0x33, 0x52,
             0xf0, 0x15, 0x62, 0x72, 0xd1, 0x0a, 0x16, 0x24, 0x34, 0xe1, 0x25, 0xf1, 0x17, 0x18, 0x19, 0x1a, 0x26, 0x27,
             0x28, 0x29, 0x2a, 0x35, 0x36, 0x37, 0x38, 0x39, 0x3a, 0x43, 0x44, 0x45, 0x46, 0x47, 0x48, 0x49, 0x4a, 0x53,
@@ -46,7 +45,7 @@ class Huffman {
      * jpegNaturalOrder[i] is the natural-order position of the i'th element of
      * zigzag order.
      */
-    private static final int[] jpegNaturalOrder = {0, 1, 8, 16, 9, 2, 3, 10, 17, 24, 32, 25, 18, 11, 4, 5, 12, 19, 26, 33,
+    private static final int[] JPEG_NATURAL_ORDER = {0, 1, 8, 16, 9, 2, 3, 10, 17, 24, 32, 25, 18, 11, 4, 5, 12, 19, 26, 33,
             40, 48, 41, 34, 27, 20, 13, 6, 7, 14, 21, 28, 35, 42, 49, 56, 57, 50, 43, 36, 29, 22, 15, 23, 30, 37, 44,
             51, 58, 59, 52, 45, 38, 31, 39, 46, 53, 60, 61, 54, 47, 55, 62, 63,};
 
@@ -56,15 +55,15 @@ class Huffman {
     public Huffman() {
 
         bits = new ArrayList<>();
-        bits.add(bitsDCluminance);
-        bits.add(bitsACluminance);
-        bits.add(bitsDCchrominance);
-        bits.add(bitsACchrominance);
+        bits.add(BITS_DC_LUMINANCE);
+        bits.add(BITS_AC_LUMINANCE);
+        bits.add(BITS_DC_CHROMINANCE);
+        bits.add(BITS_AC_CHROMINANCE);
         val = new ArrayList<>();
-        val.add(valDCluminance);
-        val.add(valACluminance);
-        val.add(valDCchrominance);
-        val.add(valACchrominance);
+        val.add(VALUES_DC_LUMINANCE);
+        val.add(VALUES_AC_LUMINANCE);
+        val.add(VALUES_DC_CHROMINANCE);
+        val.add(VALUES_AC_CHROMINANCE);
         initHuf();
     }
 
@@ -73,36 +72,35 @@ class Huffman {
      * data.
      */
 
-    void HuffmanBlockEncoder(BufferedOutputStream outStream, int[] zigzag, int prec, int DCcode, int ACcode)
+    void HuffmanBlockEncoder(BufferedOutputStream outStream, int[] zigzag, int prec, int dcCode, int acCode)
             throws IOException {
-        encodeDCPortion(outStream, zigzag, prec, DC_matrix[DCcode]);
-        encodeACPortion(outStream, zigzag, AC_matrix[ACcode]);
+        encodeDCPortion(outStream, zigzag, prec, DC_matrix[dcCode]);
+        encodeACPortion(outStream, zigzag, AC_matrix[acCode]);
     }
 
-    private void encodeACPortion(BufferedOutputStream outStream, int[] zigzag, int[][] ACSubMatrix) throws IOException {
-        int temp2;
-        int temp;
-        int r = 0;
+    private void encodeACPortion(BufferedOutputStream outStream, int[] zigzag, int[][] acSubMatrix) throws IOException {
 
+        int r = 0;
         for (int k = 1; k < 64; k++) {
-            if ((temp = zigzag[jpegNaturalOrder[k]]) == 0) {
+            int zigzagElement;
+            if ((zigzagElement = zigzag[JPEG_NATURAL_ORDER[k]]) == 0) {
                 r++;
             } else {
                 while (r > 15) {
-                    bufferIt(outStream, ACSubMatrix[0xF0][0], ACSubMatrix[0xF0][1]);
+                    bufferIt(outStream, acSubMatrix[0xF0][0], acSubMatrix[0xF0][1]);
                     r -= 16;
                 }
-                temp2 = temp;
-                if (temp < 0) {
-                    temp = -temp;
+                int temp2 = zigzagElement;
+                if (zigzagElement < 0) {
+                    zigzagElement = -zigzagElement;
                     temp2--;
                 }
                 int nbits = 1;
-                while ((temp >>= 1) != 0) {
+                while ((zigzagElement >>= 1) != 0) {
                     nbits++;
                 }
-                int i = (r << 4) + nbits;
-                bufferIt(outStream, ACSubMatrix[i][0], ACSubMatrix[i][1]);
+                int index = (r << 4) + nbits;
+                bufferIt(outStream, acSubMatrix[index][0], acSubMatrix[index][1]);
                 bufferIt(outStream, temp2, nbits);
 
                 r = 0;
@@ -110,11 +108,11 @@ class Huffman {
         }
 
         if (r > 0) {
-            bufferIt(outStream, ACSubMatrix[0][0], ACSubMatrix[0][1]);
+            bufferIt(outStream, acSubMatrix[0][0], acSubMatrix[0][1]);
         }
     }
 
-    private void encodeDCPortion(BufferedOutputStream outStream, int[] zigzag, int prec, int[][] dc_matrix) throws IOException {
+    private void encodeDCPortion(BufferedOutputStream outStream, int[] zigzag, int prec, int[][] dcSubMatrix) throws IOException {
         int temp2;
         int temp;
         temp2 = zigzag[0] - prec;
@@ -129,7 +127,7 @@ class Huffman {
             temp >>= 1;
         }
 
-        bufferIt(outStream, (dc_matrix)[nbits][0], (dc_matrix)[nbits][1]);
+        bufferIt(outStream, (dcSubMatrix)[nbits][0], (dcSubMatrix)[nbits][1]);
         // The arguments in bufferIt are code and size.
         if (nbits != 0) {
             bufferIt(outStream, temp2, nbits);
@@ -187,36 +185,36 @@ class Huffman {
 
     private void initHuf() {
 
-        int[] huffsize = new int[257];
-        int[] huffcode = new int[257];
+        int[] huffSize = new int[257];
+        int[] huffCode = new int[257];
 
         /*
          * init of the DC values for the chrominance [][0] is the code [][1] is the
          * number of bit
          */
         int[][] DC_matrix1 = new int[12][2];
-        encodeHuffman(DC_matrix1, huffsize, huffcode, bitsDCchrominance, valDCchrominance);
+        encodeHuffman(DC_matrix1, huffSize, huffCode, BITS_DC_CHROMINANCE, VALUES_DC_CHROMINANCE);
 
         /*
          * Init of the AC hufmann code for the chrominance matrix [][][0] is the code &
          * matrix[][][1] is the number of bit needed
          */
         int[][] AC_matrix1 = new int[255][2];
-        encodeHuffman(AC_matrix1, huffsize, huffcode, bitsACchrominance, valACchrominance);
+        encodeHuffman(AC_matrix1, huffSize, huffCode, BITS_AC_CHROMINANCE, VALUES_AC_CHROMINANCE);
 
         /*
          * init of the DC values for the luminance [][0] is the code [][1] is the number
          * of bit
          */
         int[][] DC_matrix0 = new int[12][2];
-        encodeHuffman(DC_matrix0, huffsize, huffcode, bitsDCluminance, valDCluminance);
+        encodeHuffman(DC_matrix0, huffSize, huffCode, BITS_DC_LUMINANCE, VALUES_DC_LUMINANCE);
 
         /*
          * Init of the AC hufmann code for luminance matrix [][][0] is the code &
          * matrix[][][1] is the number of bit
          */
         int[][] AC_matrix0 = new int[255][2];
-        encodeHuffman(AC_matrix0, huffsize, huffcode, bitsACluminance, valACluminance);
+        encodeHuffman(AC_matrix0, huffSize, huffCode, BITS_AC_LUMINANCE, VALUES_AC_LUMINANCE);
 
         DC_matrix = new int[2][][];
         AC_matrix = new int[2][][];
@@ -228,35 +226,34 @@ class Huffman {
     }
 
     private void encodeHuffman(int[][] matrix, int[] huffmanSize, int[] huffmanCode, int[] bits, int[] values) {
-        int p = 0;
-        for (int l = 1; l <= 16; l++) {
-            for (int i = 1; i <= bits[l]; i++) {
-                huffmanSize[p++] = l;
+        int lastIndex = 0;
+        for (int i = 1; i <= 16; i++) {
+            for (int j = 1; j <= bits[i]; j++) {
+                huffmanSize[lastIndex++] = i;
             }
         }
-        huffmanSize[p] = 0;
-        int lastP = p;
+        huffmanSize[lastIndex] = 0;
 
         int code = 0;
         int si = huffmanSize[0];
-        p = 0;
-        while (huffmanSize[p] != 0) {
-            while (huffmanSize[p] == si) {
-                huffmanCode[p++] = code;
+        int k = 0;
+        while (huffmanSize[k] != 0) {
+            while (huffmanSize[k] == si) {
+                huffmanCode[k++] = code;
                 code++;
             }
             code <<= 1;
             si++;
         }
 
-        for (p = 0; p < lastP; p++) {
-            matrix[values[p]][0] = huffmanCode[p];
-            matrix[values[p]][1] = huffmanSize[p];
+        for (int i = 0; i < lastIndex; i++) {
+            matrix[values[i]][0] = huffmanCode[i];
+            matrix[values[i]][1] = huffmanSize[i];
         }
     }
 
 
-    public byte[] getDHT(){
+    public byte[] getDHT() {
         int temp, oldIndex, intermediateIndex;
         int index = 4;
         oldIndex = 4;
