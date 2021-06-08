@@ -72,7 +72,7 @@ class Huffman {
      * data.
      */
 
-    void HuffmanBlockEncoder(BufferedOutputStream outStream, int[] zigzag, int prec, int dcCode, int acCode)
+    public void HuffmanBlockEncoder(BufferedOutputStream outStream, int[] zigzag, int prec, int dcCode, int acCode)
             throws IOException {
         encodeDCPortion(outStream, zigzag, prec, DC_matrix[dcCode]);
         encodeACPortion(outStream, zigzag, AC_matrix[acCode]);
@@ -134,10 +134,10 @@ class Huffman {
         }
     }
 
-//Uses an integer long (32 bits) buffer to store the Huffman encoded bits
-//and sends them to outStream by the byte.
+    //Uses an integer long (32 bits) buffer to store the Huffman encoded bits
+    //and sends them to outStream by the byte.
 
-    void bufferIt(BufferedOutputStream outStream, int code, int size) throws IOException {
+    private void bufferIt(BufferedOutputStream outStream, int code, int size) throws IOException {
         int PutBuffer = code;
         int PutBits = bufferPutBits;
 
@@ -160,7 +160,7 @@ class Huffman {
 
     }
 
-    void flushBuffer(BufferedOutputStream outStream) throws IOException {
+    public void flushBuffer(BufferedOutputStream outStream) throws IOException {
         int PutBuffer = bufferPutBuffer;
         int PutBits = bufferPutBits;
         while (PutBits >= 8) {
