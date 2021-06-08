@@ -4,6 +4,8 @@ import java.awt.*;
 import java.awt.image.PixelGrabber;
 
 class JpegInfo {
+    private static final int N = 8;
+    private static final double M = 8.0;
     private String comment;
     private final Image image;
     public final int imageHeight;
@@ -12,18 +14,18 @@ class JpegInfo {
     public final int[] blockHeight;
 
     // the following are set as the default
-    final int precision = 8;
-    final int numberOfComponents = 3;
-    final float[][][] components;
-    final static int[] componentsId = {1, 2, 3};
-    final int[] horizontalSamplingFactor = {1, 1, 1};
-    final int[] verticalSamplingFactor = {1, 1, 1};
-    final int[] quantizationTableNumber = {0, 1, 1};
-    final int[] directCurrentTableNumber = {0, 1, 1};
-    final int[] alternatingCurrentTableNumber = {0, 1, 1};
-    final int Ss = 0;
-    final int Se = 63;
-    final int Al = 0;
+    public final int precision = 8;
+    public final int numberOfComponents = 3;
+    public final float[][][] components;
+    public final static int[] componentsId = {1, 2, 3};
+    public final int[] horizontalSamplingFactor = {1, 1, 1};
+    public final int[] verticalSamplingFactor = {1, 1, 1};
+    public final int[] quantizationTableNumber = {0, 1, 1};
+    public final int[] directCurrentTableNumber = {0, 1, 1};
+    public final int[] alternatingCurrentTableNumber = {0, 1, 1};
+    public final int Ss = 0;
+    public final int Se = 63;
+    public final int Al = 0;
     private final int[] componentsWidth;
     private final int[] componentsHeight;
 
@@ -54,8 +56,8 @@ class JpegInfo {
      */
 
     private void getYCCArray() {
-        int[] values = new int[imageWidth * imageHeight];
-        int r, g, b, y, x;
+
+      int[] values = new int[imageWidth * imageHeight];
 //In order to minimize the chance that grabPixels will throw an exception
 //it may be necessary to grab some pixels every few scanlines and process
 //those before going for more.  The time expense may be prohibitive.
@@ -65,24 +67,24 @@ class JpegInfo {
                 imageWidth);
         int maxHorizontalSamplingFactor = 1;
         int maxVerticalSamplingFactor = 1;
-        for (y = 0; y < numberOfComponents; y++) {
+        for (int y = 0; y < numberOfComponents; y++) {
             maxHorizontalSamplingFactor = Math.max(maxHorizontalSamplingFactor, horizontalSamplingFactor[y]);
             maxVerticalSamplingFactor = Math.max(maxVerticalSamplingFactor, verticalSamplingFactor[y]);
         }
 
-        for (y = 0; y < numberOfComponents; y++) {
-            componentsWidth[y] = (((imageWidth % 8 != 0) ? ((int) Math.ceil((double) imageWidth / 8.0)) * 8 : imageWidth)
+        for (int y = 0; y < numberOfComponents; y++) {
+            componentsWidth[y] = (((imageWidth % N != 0) ? ((int) Math.ceil((double) imageWidth / 8.0)) * N : imageWidth)
                     / maxHorizontalSamplingFactor) * horizontalSamplingFactor[y];
 
             // results in a multiple of 8 for compWidth
             // this will make the rest of the program fail for the unlikely
             // event that someone tries to compress an 16 x 16 pixel image
             // which would of course be worse than pointless
-            blockWidth[y] = (int) Math.ceil((double) componentsWidth[y] / 8.0);
-            componentsHeight[y] = (((imageHeight % 8 != 0) ? ((int) Math.ceil((double) imageHeight / 8.0)) * 8 : imageHeight)
+            blockWidth[y] = (int) Math.ceil((double) componentsWidth[y] / M);
+            componentsHeight[y] = (((imageHeight % N != 0) ? ((int) Math.ceil((double) imageHeight / M)) * N : imageHeight)
                     / maxVerticalSamplingFactor) * verticalSamplingFactor[y];
 
-            blockHeight[y] = (int) Math.ceil((double) componentsHeight[y] / 8.0);
+            blockHeight[y] = (int) Math.ceil((double) componentsHeight[y] / M);
         }
         try {
             grabber.grabPixels();
@@ -92,11 +94,11 @@ class JpegInfo {
         float[][] Cr1 = new float[componentsHeight[0]][componentsWidth[0]];
         float[][] Cb1 = new float[componentsHeight[0]][componentsWidth[0]];
         int index = 0;
-        for (y = 0; y < imageHeight; ++y) {
-            for (x = 0; x < imageWidth; ++x) {
-                r = ((values[index] >> 16) & 0xff);
-                g = ((values[index] >> 8) & 0xff);
-                b = (values[index] & 0xff);
+        for (int y = 0; y < imageHeight; ++y) {
+            for (int x = 0; x < imageWidth; ++x) {
+                int r = ((values[index] >> 16) & 0xff);
+                int g = ((values[index] >> 8) & 0xff);
+                int b = (values[index] & 0xff);
 
 
                 Y[y][x] = (float) ((0.299 * (float) r + 0.587 * (float) g + 0.114 * (float) b));
@@ -105,8 +107,6 @@ class JpegInfo {
                 index++;
             }
         }
-
-
 
         components[0] = Y;
         components[1] = Cb1;
@@ -165,6 +165,5 @@ class JpegInfo {
         System.arraycopy(comment, 0, COM, 4, comment.length);
         return COM;
     }
-
 
 }

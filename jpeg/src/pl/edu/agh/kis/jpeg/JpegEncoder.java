@@ -49,8 +49,8 @@ import java.io.OutputStream;
 * JpegEncoder - The JPEG main program which performs a jpeg compression of
 * an image.
 */
-
 public class JpegEncoder {
+	private static final int N = 8;
 	private final BufferedOutputStream outStream;
 	private final JpegInfo jpegInfo;
 	private final Huffman huffman;
@@ -96,58 +96,50 @@ public class JpegEncoder {
 		outStream.flush();
 	}
 
-	void WriteCompressedData(BufferedOutputStream outStream) throws IOException {
-		int i, j, r, c, a, b;
-		int comp, xpos, ypos, xblockoffset, yblockoffset;
-		float[][] inputArray;
+	public void WriteCompressedData(BufferedOutputStream outStream) throws IOException {
 		float[][] dctArray1 = new float[8][8];
-		double[][] dctArray2;
-		int[] dctArray3;
-
 		/*
 		 * This method controls the compression of the image. Starting at the upper left
 		 * of the image, it compresses 8x8 blocks of data until the entire image has
 		 * been compressed.
 		 */
-
 		int[] lastDCvalue = new int[jpegInfo.numberOfComponents];
-		int MinBlockWidth, MinBlockHeight;
 //This initial setting of MinBlockWidth and MinBlockHeight is done to
 //ensure they start with values larger than will actually be the case.
-		MinBlockWidth = ((imageWidth % 8 != 0) ? (int) (Math.floor((double) imageWidth / 8.0) + 1) * 8 : imageWidth);
-		MinBlockHeight = ((imageHeight % 8 != 0) ? (int) (Math.floor((double) imageHeight / 8.0) + 1) * 8
+		int MinBlockWidth = ((imageWidth % N != 0) ? (int) (Math.floor((double) imageWidth / 8.0) + 1) * N : imageWidth);
+		int MinBlockHeight = ((imageHeight % N != 0) ? (int) (Math.floor((double) imageHeight / 8.0) + 1) * N
 				: imageHeight);
-		for (comp = 0; comp < jpegInfo.numberOfComponents; comp++) {
+		for (int comp = 0; comp < jpegInfo.numberOfComponents; comp++) {
 			MinBlockWidth = Math.min(MinBlockWidth, jpegInfo.blockWidth[comp]);
 			MinBlockHeight = Math.min(MinBlockHeight, jpegInfo.blockHeight[comp]);
 		}
-		for (r = 0; r < MinBlockHeight; r++) {
-			for (c = 0; c < MinBlockWidth; c++) {
-				xpos = c * 8;
-				ypos = r * 8;
-				for (comp = 0; comp < jpegInfo.numberOfComponents; comp++) {
-					inputArray = jpegInfo.components[comp];
+		for (int r = 0; r < MinBlockHeight; r++) {
+			for (int c = 0; c < MinBlockWidth; c++) {
+				int xpos = c * N;
+				int ypos = r * N;
+				for (int comp = 0; comp < jpegInfo.numberOfComponents; comp++) {
+					float[][] inputArray = jpegInfo.components[comp];
 
-					for (i = 0; i < jpegInfo.verticalSamplingFactor[comp]; i++) {
-						for (j = 0; j < jpegInfo.horizontalSamplingFactor[comp]; j++) {
-							xblockoffset = j * 8;
-							yblockoffset = i * 8;
-							for (a = 0; a < 8; a++) {
-								for (b = 0; b < 8; b++) {
+					for (int i = 0; i < jpegInfo.verticalSamplingFactor[comp]; i++) {
+						for (int j = 0; j < jpegInfo.horizontalSamplingFactor[comp]; j++) {
+							int xblockoffset = j * N;
+							int yblockoffset = i * N;
+							for (int a = 0; a < N; a++) {
+								for (int b = 0; b < N; b++) {
 
 //I believe this is where the dirty line at the bottom of the image is
 //coming from.  I need to do a check here to make sure I'm not reading past
 //image data.
 //This seems to not be a big issue right now. (04/04/98)
 
-									dctArray1[a][b] = inputArray[ypos + yblockoffset + a][xpos + xblockoffset + b];
+								dctArray1[a][b] = inputArray[ypos + yblockoffset + a][xpos + xblockoffset + b];
 								}
 							}
 //The following code commented out because on some images this technique
 //results in poor right and bottom borders.
 //                     if ((!JpegObj.lastColumnIsDummy[comp] || c < Width - 1) && (!JpegObj.lastRowIsDummy[comp] || r < Height - 1)) {
-							dctArray2 = dct.forwardDCT(dctArray1);
-							dctArray3 = dct.quantizeBlock(dctArray2, jpegInfo.quantizationTableNumber[comp]);
+							double[][] dctArray2 = dct.forwardDCT(dctArray1);
+							int[] dctArray3 = dct.quantizeBlock(dctArray2, jpegInfo.quantizationTableNumber[comp]);
 //                     }
 //                     else {
 //                        zeroArray[0] = dctArray3[0];
@@ -166,12 +158,12 @@ public class JpegEncoder {
 		huffman.flushBuffer(outStream);
 	}
 
-	void WriteEOI(BufferedOutputStream out) throws IOException {
+	public void WriteEOI(BufferedOutputStream out) throws IOException {
 		byte[] EOI = { (byte) 0xFF, (byte) 0xD9 };
 		WriteMarker(EOI, out);
 	}
 
-	void WriteHeaders(BufferedOutputStream out) throws IOException {
+	public void WriteHeaders(BufferedOutputStream out) throws IOException {
 //the SOI marker
 		WriteMarker(SOI, out);
 
@@ -199,34 +191,28 @@ public class JpegEncoder {
 
 	private byte[] getDQT() {
 		//0 is the luminance index and 1 is the chrominance index
-		int j;
-		int offset;
-		int i;
-		int[] tempArray;
 		byte[] DQT = new byte[134];
 		DQT[0] = (byte) 0xFF;
 		DQT[1] = (byte) 0xDB;
 		DQT[2] = (byte) 0x00;
 		DQT[3] = (byte) 0x84;
-		offset = 4;
-		for (i = 0; i < 2; i++) {
+		int offset = 4;
+		for (int i = 0; i < 2; i++) {
 			DQT[offset++] = (byte) (i);
-			tempArray = (int[]) dct.quantum[i];
-			for (j = 0; j < 64; j++) {
+			int[] tempArray = (int[]) dct.quantum[i];
+			for (int j = 0; j < 64; j++) {
 				DQT[offset++] = (byte) tempArray[jpegNaturalOrder[j]];
 			}
 		}
 		return DQT;
 	}
 
-	void WriteMarker(byte[] data, BufferedOutputStream out) throws IOException {
+	public void WriteMarker(byte[] data, BufferedOutputStream out) throws IOException {
 		out.write(data, 0, 2);
 	}
 
-	void WriteArray(byte[] data, BufferedOutputStream out) throws IOException {
-		int length;
-		length = ((data[2] & 0xFF) << 8) + (data[3] & 0xFF) + 2;
-		out.write(data, 0, length);
+	public void WriteArray(byte[] data, BufferedOutputStream out) throws IOException {
+		out.write(data, 0, ((data[2] & 0xFF) << 8) + (data[3] & 0xFF) + 2);
 	}
 }
 
@@ -245,4 +231,3 @@ public class JpegEncoder {
  * JpegInfo - Given an image, sets default information about it and divides it
  * into its constituant components, downsizing those that need to be.
  */
-
