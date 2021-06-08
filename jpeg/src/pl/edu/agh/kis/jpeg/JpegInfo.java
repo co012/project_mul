@@ -23,7 +23,6 @@ class JpegInfo {
     final int[] alternatingCurrentTableNumber = {0, 1, 1};
     final int Ss = 0;
     final int Se = 63;
-    final int Ah = 0;
     final int Al = 0;
     private final int[] componentsWidth;
     private final int[] componentsHeight;

@@ -126,7 +126,7 @@ public class JpegEncoder {
 				xpos = c * 8;
 				ypos = r * 8;
 				for (comp = 0; comp < jpegInfo.numberOfComponents; comp++) {
-					inputArray = (float[][]) jpegInfo.components[comp];
+					inputArray = jpegInfo.components[comp];
 
 					for (i = 0; i < jpegInfo.verticalSamplingFactor[comp]; i++) {
 						for (j = 0; j < jpegInfo.horizontalSamplingFactor[comp]; j++) {

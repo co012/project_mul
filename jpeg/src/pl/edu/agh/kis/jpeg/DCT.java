@@ -119,8 +119,8 @@ class DCT {
      * This method preforms a DCT on a block of image data using the AAN method as
      * implemented in the IJG Jpeg-6a library.
      */
-    double[][] forwardDCT(float input[][]) {
-        double output[][] = new double[N][N];
+    double[][] forwardDCT(float[][] input) {
+        double[][] output = new double[N][N];
         double tmp0, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7;
         double tmp10, tmp11, tmp12, tmp13;
         double z1, z2, z3, z4, z5, z11, z13;
@@ -130,7 +130,7 @@ class DCT {
 //Subtracts 128 from the input values
         for (i = 0; i < 8; i++) {
             for (j = 0; j < 8; j++) {
-                output[i][j] = ((double) input[i][j] - (double) 128.0);
+                output[i][j] = ((double) input[i][j] - 128.0);
 //                     input[i][j] -= 128;
 
             }
@@ -154,7 +154,7 @@ class DCT {
             output[i][0] = tmp10 + tmp11;
             output[i][4] = tmp10 - tmp11;
 
-            z1 = (tmp12 + tmp13) * (double) 0.707106781;
+            z1 = (tmp12 + tmp13) * 0.707106781;
             output[i][2] = tmp13 + z1;
             output[i][6] = tmp13 - z1;
 
@@ -162,10 +162,10 @@ class DCT {
             tmp11 = tmp5 + tmp6;
             tmp12 = tmp6 + tmp7;
 
-            z5 = (tmp10 - tmp12) * (double) 0.382683433;
-            z2 = ((double) 0.541196100) * tmp10 + z5;
-            z4 = ((double) 1.306562965) * tmp12 + z5;
-            z3 = tmp11 * ((double) 0.707106781);
+            z5 = (tmp10 - tmp12) * 0.382683433;
+            z2 = 0.541196100 * tmp10 + z5;
+            z4 = 1.306562965 * tmp12 + z5;
+            z3 = tmp11 * 0.707106781;
 
             z11 = tmp7 + z3;
             z13 = tmp7 - z3;
@@ -194,7 +194,7 @@ class DCT {
             output[0][i] = tmp10 + tmp11;
             output[4][i] = tmp10 - tmp11;
 
-            z1 = (tmp12 + tmp13) * (double) 0.707106781;
+            z1 = (tmp12 + tmp13) * 0.707106781;
             output[2][i] = tmp13 + z1;
             output[6][i] = tmp13 - z1;
 
@@ -202,10 +202,10 @@ class DCT {
             tmp11 = tmp5 + tmp6;
             tmp12 = tmp6 + tmp7;
 
-            z5 = (tmp10 - tmp12) * (double) 0.382683433;
-            z2 = ((double) 0.541196100) * tmp10 + z5;
-            z4 = ((double) 1.306562965) * tmp12 + z5;
-            z3 = tmp11 * ((double) 0.707106781);
+            z5 = (tmp10 - tmp12) * 0.382683433;
+            z2 = 0.541196100 * tmp10 + z5;
+            z4 = 1.306562965 * tmp12 + z5;
+            z3 = tmp11 * 0.707106781;
 
             z11 = tmp7 + z3;
             z13 = tmp7 - z3;
@@ -222,8 +222,8 @@ class DCT {
     /*
      * This method quantitizes data and rounds it to the nearest integer.
      */
-    int[] quantizeBlock(double inputData[][], int code) {
-        int outputData[] = new int[N * N];
+    int[] quantizeBlock(double[][] inputData, int code) {
+        int[] outputData = new int[N * N];
         int i, j;
         int index;
         index = 0;
