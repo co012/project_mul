@@ -50,9 +50,9 @@ class Huffman {
             40, 48, 41, 34, 27, 20, 13, 6, 7, 14, 21, 28, 35, 42, 49, 56, 57, 50, 43, 36, 29, 22, 15, 23, 30, 37, 44,
             51, 58, 59, 52, 45, 38, 31, 39, 46, 53, 60, 61, 54, 47, 55, 62, 63,};
 
-    /*
+    /**
      * The Huffman class constructor
-     */
+     **/
     public Huffman() {
 
         bits = new ArrayList<>();
@@ -75,37 +75,21 @@ class Huffman {
 
     void HuffmanBlockEncoder(BufferedOutputStream outStream, int[] zigzag, int prec, int DCcode, int ACcode)
             throws IOException {
-        int temp, temp2, nbits, k, r, i;
+        encodeDCPortion(outStream, zigzag, prec, DC_matrix[DCcode]);
+        encodeACPortion(outStream, zigzag, AC_matrix[ACcode]);
+    }
 
-//The DC portion
+    private void encodeACPortion(BufferedOutputStream outStream, int[] zigzag, int[][] ACSubMatrix) throws IOException {
+        int temp2;
+        int temp;
+        int r = 0;
 
-        temp = temp2 = zigzag[0] - prec;
-        if (temp < 0) {
-            temp = -temp;
-            temp2--;
-        }
-        nbits = 0;
-        while (temp != 0) {
-            nbits++;
-            temp >>= 1;
-        }
-//     if (nbits > 11) nbits = 11;
-        bufferIt(outStream, (DC_matrix[DCcode])[nbits][0], (DC_matrix[DCcode])[nbits][1]);
-        // The arguments in bufferIt are code and size.
-        if (nbits != 0) {
-            bufferIt(outStream, temp2, nbits);
-        }
-
-//The AC portion
-
-        r = 0;
-
-        for (k = 1; k < 64; k++) {
+        for (int k = 1; k < 64; k++) {
             if ((temp = zigzag[jpegNaturalOrder[k]]) == 0) {
                 r++;
             } else {
                 while (r > 15) {
-                    bufferIt(outStream, (AC_matrix[ACcode])[0xF0][0], (AC_matrix[ACcode])[0xF0][1]);
+                    bufferIt(outStream, ACSubMatrix[0xF0][0], ACSubMatrix[0xF0][1]);
                     r -= 16;
                 }
                 temp2 = temp;
@@ -113,12 +97,12 @@ class Huffman {
                     temp = -temp;
                     temp2--;
                 }
-                nbits = 1;
+                int nbits = 1;
                 while ((temp >>= 1) != 0) {
                     nbits++;
                 }
-                i = (r << 4) + nbits;
-                bufferIt(outStream, (AC_matrix[ACcode])[i][0], (AC_matrix[ACcode])[i][1]);
+                int i = (r << 4) + nbits;
+                bufferIt(outStream, ACSubMatrix[i][0], ACSubMatrix[i][1]);
                 bufferIt(outStream, temp2, nbits);
 
                 r = 0;
@@ -126,9 +110,30 @@ class Huffman {
         }
 
         if (r > 0) {
-            bufferIt(outStream, (AC_matrix[ACcode])[0][0], (AC_matrix[ACcode])[0][1]);
+            bufferIt(outStream, ACSubMatrix[0][0], ACSubMatrix[0][1]);
+        }
+    }
+
+    private void encodeDCPortion(BufferedOutputStream outStream, int[] zigzag, int prec, int[][] dc_matrix) throws IOException {
+        int temp2;
+        int temp;
+        temp2 = zigzag[0] - prec;
+        temp = temp2;
+        if (temp < 0) {
+            temp = -temp;
+            temp2--;
+        }
+        int nbits = 0;
+        while (temp != 0) {
+            nbits++;
+            temp >>= 1;
         }
 
+        bufferIt(outStream, (dc_matrix)[nbits][0], (dc_matrix)[nbits][1]);
+        // The arguments in bufferIt are code and size.
+        if (nbits != 0) {
+            bufferIt(outStream, temp2, nbits);
+        }
     }
 
 //Uses an integer long (32 bits) buffer to store the Huffman encoded bits
@@ -175,19 +180,13 @@ class Huffman {
         }
     }
 
-    /*
+    /**
      * Initialisation of the Huffman codes for Luminance and Chrominance. This code
      * results in the same tables created in the IJG Jpeg-6a library.
-     */
+     **/
 
     private void initHuf() {
-        int[][] DC_matrix0 = new int[12][2];
-        int[][] DC_matrix1 = new int[12][2];
-        int[][] AC_matrix0 = new int[255][2];
-        int[][] AC_matrix1 = new int[255][2];
-        DC_matrix = new int[2][][];
-        AC_matrix = new int[2][][];
-        int p, l, i, lastp, si, code;
+
         int[] huffsize = new int[257];
         int[] huffcode = new int[257];
 
@@ -195,123 +194,32 @@ class Huffman {
          * init of the DC values for the chrominance [][0] is the code [][1] is the
          * number of bit
          */
-
-        p = 0;
-        for (l = 1; l <= 16; l++) {
-            for (i = 1; i <= bitsDCchrominance[l]; i++) {
-                huffsize[p++] = l;
-            }
-        }
-        huffsize[p] = 0;
-        lastp = p;
-
-        code = 0;
-        si = huffsize[0];
-        p = 0;
-        while (huffsize[p] != 0) {
-            while (huffsize[p] == si) {
-                huffcode[p++] = code;
-                code++;
-            }
-            code <<= 1;
-            si++;
-        }
-
-        for (p = 0; p < lastp; p++) {
-            DC_matrix1[valDCchrominance[p]][0] = huffcode[p];
-            DC_matrix1[valDCchrominance[p]][1] = huffsize[p];
-        }
+        int[][] DC_matrix1 = new int[12][2];
+        encodeHuffman(DC_matrix1, huffsize, huffcode, bitsDCchrominance, valDCchrominance);
 
         /*
          * Init of the AC hufmann code for the chrominance matrix [][][0] is the code &
          * matrix[][][1] is the number of bit needed
          */
-
-        p = 0;
-        for (l = 1; l <= 16; l++) {
-            for (i = 1; i <= bitsACchrominance[l]; i++) {
-                huffsize[p++] = l;
-            }
-        }
-        huffsize[p] = 0;
-        lastp = p;
-
-        code = 0;
-        si = huffsize[0];
-        p = 0;
-        while (huffsize[p] != 0) {
-            while (huffsize[p] == si) {
-                huffcode[p++] = code;
-                code++;
-            }
-            code <<= 1;
-            si++;
-        }
-
-        for (p = 0; p < lastp; p++) {
-            AC_matrix1[valACchrominance[p]][0] = huffcode[p];
-            AC_matrix1[valACchrominance[p]][1] = huffsize[p];
-        }
+        int[][] AC_matrix1 = new int[255][2];
+        encodeHuffman(AC_matrix1, huffsize, huffcode, bitsACchrominance, valACchrominance);
 
         /*
          * init of the DC values for the luminance [][0] is the code [][1] is the number
          * of bit
          */
-        p = 0;
-        for (l = 1; l <= 16; l++) {
-            for (i = 1; i <= bitsDCluminance[l]; i++) {
-                huffsize[p++] = l;
-            }
-        }
-        huffsize[p] = 0;
-        lastp = p;
-
-        code = 0;
-        si = huffsize[0];
-        p = 0;
-        while (huffsize[p] != 0) {
-            while (huffsize[p] == si) {
-                huffcode[p++] = code;
-                code++;
-            }
-            code <<= 1;
-            si++;
-        }
-
-        for (p = 0; p < lastp; p++) {
-            DC_matrix0[valDCluminance[p]][0] = huffcode[p];
-            DC_matrix0[valDCluminance[p]][1] = huffsize[p];
-        }
+        int[][] DC_matrix0 = new int[12][2];
+        encodeHuffman(DC_matrix0, huffsize, huffcode, bitsDCluminance, valDCluminance);
 
         /*
          * Init of the AC hufmann code for luminance matrix [][][0] is the code &
          * matrix[][][1] is the number of bit
          */
+        int[][] AC_matrix0 = new int[255][2];
+        encodeHuffman(AC_matrix0, huffsize, huffcode, bitsACluminance, valACluminance);
 
-        p = 0;
-        for (l = 1; l <= 16; l++) {
-            for (i = 1; i <= bitsACluminance[l]; i++) {
-                huffsize[p++] = l;
-            }
-        }
-        huffsize[p] = 0;
-        lastp = p;
-
-        code = 0;
-        si = huffsize[0];
-        p = 0;
-        while (huffsize[p] != 0) {
-            while (huffsize[p] == si) {
-                huffcode[p++] = code;
-                code++;
-            }
-            code <<= 1;
-            si++;
-        }
-        for (int q = 0; q < lastp; q++) {
-            AC_matrix0[valACluminance[q]][0] = huffcode[q];
-            AC_matrix0[valACluminance[q]][1] = huffsize[q];
-        }
+        DC_matrix = new int[2][][];
+        AC_matrix = new int[2][][];
 
         DC_matrix[0] = DC_matrix0;
         DC_matrix[1] = DC_matrix1;
@@ -319,31 +227,57 @@ class Huffman {
         AC_matrix[1] = AC_matrix1;
     }
 
+    private void encodeHuffman(int[][] matrix, int[] huffmanSize, int[] huffmanCode, int[] bits, int[] values) {
+        int p = 0;
+        for (int l = 1; l <= 16; l++) {
+            for (int i = 1; i <= bits[l]; i++) {
+                huffmanSize[p++] = l;
+            }
+        }
+        huffmanSize[p] = 0;
+        int lastP = p;
+
+        int code = 0;
+        int si = huffmanSize[0];
+        p = 0;
+        while (huffmanSize[p] != 0) {
+            while (huffmanSize[p] == si) {
+                huffmanCode[p++] = code;
+                code++;
+            }
+            code <<= 1;
+            si++;
+        }
+
+        for (p = 0; p < lastP; p++) {
+            matrix[values[p]][0] = huffmanCode[p];
+            matrix[values[p]][1] = huffmanSize[p];
+        }
+    }
+
 
     public byte[] getDHT(){
-        byte[] DHT1, DHT2, DHT3, DHT4;
-        int bytes, temp, oldIndex, intermediateIndex;
+        int temp, oldIndex, intermediateIndex;
         int index = 4;
-        int i,j;
         oldIndex = 4;
-        DHT1 = new byte[17];
-        DHT4 = new byte[4];
+        byte[] DHT1 = new byte[17];
+        byte[] DHT4 = new byte[4];
         DHT4[0] = (byte) 0xFF;
         DHT4[1] = (byte) 0xC4;
-        for (i = 0; i < 4; i++) {
-            bytes = 0;
+        for (int i = 0; i < 4; i++) {
+            int bytes = 0;
             DHT1[index++ - oldIndex] = (byte) bits.get(i)[0];
-            for (j = 1; j < 17; j++) {
+            for (int j = 1; j < 17; j++) {
                 temp = bits.get(i)[j];
                 DHT1[index++ - oldIndex] = (byte) temp;
                 bytes += temp;
             }
             intermediateIndex = index;
-            DHT2 = new byte[bytes];
-            for (j = 0; j < bytes; j++) {
+            byte[] DHT2 = new byte[bytes];
+            for (int j = 0; j < bytes; j++) {
                 DHT2[index++ - intermediateIndex] = (byte) val.get(i)[j];
             }
-            DHT3 = new byte[index];
+            byte[] DHT3 = new byte[index];
             System.arraycopy(DHT4, 0, DHT3, 0, oldIndex);
             System.arraycopy(DHT1, 0, DHT3, oldIndex, 17);
             System.arraycopy(DHT2, 0, DHT3, oldIndex + 17, bytes);
